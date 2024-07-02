@@ -82,10 +82,10 @@ int8_t TMAG5273::begin(uint8_t sensorAddress, TwoWire &wirePort)
     }
 
     // Check that X and Y angle calculation is disabled
-    if (getAngleEn() != TMAG5273_NO_ANGLE_CALCULATION)
-    {
-        return 0;
-    }
+    // if (getAngleEn() != TMAG5273_NO_ANGLE_CALCULATION)
+    // {
+    //     return 0;
+    // }
 
     // returns true if all the checks pass
     return 1;
@@ -176,7 +176,7 @@ int8_t TMAG5273::writeRegisters(uint8_t regAddress, uint8_t *dataBuffer, uint8_t
 uint8_t TMAG5273::readRegister(uint8_t regAddress)
 {
     uint8_t regVal = 0;
-    readRegisters(regAddress, &regVal, 2);
+    readRegisters(regAddress, &regVal, 1);
     return regVal;
 }
 
@@ -215,8 +215,8 @@ int8_t TMAG5273::setupWakeUpAndSleep()
 int8_t TMAG5273::readWakeUpAndSleepData(float *xVal, float *yVal, float *zVal, float *temperature)
 {
     uint8_t wakeupRegisterRead[8];
-    // Read 4 bits of data
-    readRegisters(TMAG5273_REG_T_MSB_RESULT, wakeupRegisterRead, 4);
+    // Read 8 bits of data
+    readRegisters(TMAG5273_REG_T_MSB_RESULT, wakeupRegisterRead, 8);
 
     // Need to get the values to themselves (bitwise operation)
     *zVal = (wakeupRegisterRead[6] << 8) & wakeupRegisterRead[7];
@@ -2527,8 +2527,12 @@ float TMAG5273::getTemp()
 /// @return X-Channel data conversion results
 float TMAG5273::getXData()
 {
-    int8_t xLSB = readRegister(TMAG5273_REG_X_LSB_RESULT);
-    int8_t xMSB = readRegister(TMAG5273_REG_X_MSB_RESULT);
+    uint8_t buffer[2];
+    readRegisters(TMAG5273_REG_X_MSB_RESULT, buffer, 2);
+    int8_t xMSB = (int8_t)buffer[0];
+    int8_t xLSB = (int8_t)buffer[1];
+    // int8_t xLSB = readRegister(TMAG5273_REG_X_LSB_RESULT);
+    // int8_t xMSB = readRegister(TMAG5273_REG_X_MSB_RESULT);
 
     // Variable to store full X data
     int16_t xData = 0;
@@ -2563,8 +2567,12 @@ float TMAG5273::getYData()
     int8_t yLSB = 0;
     int8_t yMSB = 0;
 
-    yLSB = readRegister(TMAG5273_REG_Y_LSB_RESULT);
-    yMSB = readRegister(TMAG5273_REG_Y_MSB_RESULT);
+    uint8_t buffer[2];
+    readRegisters(TMAG5273_REG_Y_MSB_RESULT, buffer, 2);
+    yMSB = (int8_t)buffer[0];
+    yLSB = (int8_t)buffer[1];
+    // yLSB = readRegister(TMAG5273_REG_Y_LSB_RESULT);
+    // yMSB = readRegister(TMAG5273_REG_Y_MSB_RESULT);
 
     // Variable to store full Y data
     int16_t yData = 0;
@@ -2599,8 +2607,12 @@ float TMAG5273::getZData()
     int8_t zLSB = 0;
     int8_t zMSB = 0;
 
-    zLSB = readRegister(TMAG5273_REG_Z_LSB_RESULT);
-    zMSB = readRegister(TMAG5273_REG_Z_MSB_RESULT);
+    uint8_t buffer[2];
+    readRegisters(TMAG5273_REG_Z_MSB_RESULT, buffer, 2);
+    zMSB = (int8_t)buffer[0];
+    zLSB = (int8_t)buffer[1];
+    // zLSB = readRegister(TMAG5273_REG_Z_LSB_RESULT);
+    // zMSB = readRegister(TMAG5273_REG_Z_MSB_RESULT);
 
     // Variable to store full X data
     int16_t zData = 0;
@@ -2639,8 +2651,12 @@ float TMAG5273::getAngleResult()
     uint8_t angleLSB = 0;
     uint8_t angleMSB = 0;
 
-    angleLSB = readRegister(TMAG5273_REG_ANGLE_RESULT_LSB) & 0b11111111;
-    angleMSB = readRegister(TMAG5273_REG_ANGLE_RESULT_MSB);
+    uint8_t buffer[2];
+    readRegisters(TMAG5273_REG_ANGLE_RESULT_MSB, buffer, 2);
+    angleMSB = buffer[0];
+    angleLSB = buffer[1];
+    // angleLSB = readRegister(TMAG5273_REG_ANGLE_RESULT_LSB) & 0b11111111;
+    // angleMSB = readRegister(TMAG5273_REG_ANGLE_RESULT_MSB);
 
     // Variable to hold the full angle MSB and LSB registers
     int16_t angleReg = 0;
